@@ -1,5 +1,8 @@
 ## install-karpenter-with-cdk 
 
+- ja: [CDK で EKS クラスタに Karpenter をインストールし柔軟で高速なオートスケールを行う - sambaiz-net](https://www.sambaiz.net/article/455/)
+- en: [Install Karpenter on an EKS cluster with CDK to auto-scale flexibility and quickly - sambaiz-net](https://www.sambaiz.net/en/article/455/)
+
 ### Launch an EKS cluster with Karpenter
 
 ```sh

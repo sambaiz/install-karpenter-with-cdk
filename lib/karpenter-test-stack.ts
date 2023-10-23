@@ -5,8 +5,7 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import * as eks from 'aws-cdk-lib/aws-eks';
 import * as cfninc from 'aws-cdk-lib/cloudformation-include';
 import 'fs'
-import * as fs from "fs";
-import * as https from "https";
+import { KubectlV27Layer } from '@aws-cdk/lambda-layer-kubectl-v27';
 
 class KapenterResourcesStack extends cdk.NestedStack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps & {karpenterVersion: string, clusterName: string}) {
@@ -59,6 +58,7 @@ export class KarpenterTestStack extends cdk.Stack {
       mastersRole,
       clusterName: clusterName,
       version: eks.KubernetesVersion.V1_27,
+      kubectlLayer: new KubectlV27Layer(this, 'KubectlLayer'),
       defaultCapacity: 2,
       defaultCapacityInstance: new ec2.InstanceType('m5.large'),
     })

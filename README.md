@@ -6,7 +6,7 @@
 ### Launch an EKS cluster with Karpenter
 
 ```sh
-export KARPENTER_VERSION="v0.31.0" 
+export KARPENTER_VERSION="v0.32.0"
 curl -o karpenter_${KARPENTER_VERSION}.yaml  https://raw.githubusercontent.com/aws/karpenter/"${KARPENTER_VERSION}"/website/content/en/preview/getting-started/getting-started-with-karpenter/cloudformation.yaml
 
 npm run build

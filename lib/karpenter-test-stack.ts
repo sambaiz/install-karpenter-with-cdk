@@ -140,43 +140,48 @@ export class KarpenterTestStack extends cdk.Stack {
   }
 
   applyDefaultProvisionerAndNodeTemplateManifest(cluster: eks.Cluster) {
-    return cluster.addManifest('DefaultProvisionerAndNodeTemplate', {
-      "apiVersion": "karpenter.sh/v1alpha5",
-      "kind": "Provisioner",
+    return cluster.addManifest('DefaultProvisionerAndNodeTemplate',  {
+      "apiVersion": "karpenter.k8s.aws/v1beta1",
+      "kind": "EC2NodeClass",
       "metadata": {
         "name": "default"
       },
       "spec": {
-        "requirements": [{
-          "key": "karpenter.sh/capacity-type",
-          "operator": "In",
-          "values": ["spot"]
+        "amiFamily": "AL2",
+        "role": `KarpenterNodeRole-${cluster.clusterName}`,
+        "subnetSelectorTerms": [{
+          "tags": {
+            "Name": cluster.vpc.publicSubnets.join(",")
+          }
         }],
-        // maximum amount of resources that the provisioner will manage
-        "limits": {
-          "resources": {
-            "cpu": 1000
-          },
-        },
-        "providerRef": {
-          "name": "default"
-        },
-        "consolidation": {
-          "enabled": true
-        }
+        "securityGroupSelectorTerms": [{
+          "id": cluster.clusterSecurityGroup.securityGroupId
+        }],
       }
     }, {
-      "apiVersion": "karpenter.k8s.aws/v1alpha1",
-      "kind": "AWSNodeTemplate",
+      "apiVersion": "karpenter.sh/v1beta1",
+      "kind": "NodePool",
       "metadata": {
         "name": "default"
       },
       "spec": {
-        "subnetSelector": {
-          "Name": cluster.vpc.publicSubnets.join(",")
+        "template": {
+          "spec": {
+            "nodeClassRef": {
+              "name": "default"
+            },
+            "requirements": [{
+              "key": "karpenter.sh/capacity-type",
+              "operator": "In",
+              "values": ["spot"]
+            }],
+          }
         },
-        "securityGroupSelector": {
-          "aws-ids": cluster.clusterSecurityGroup.securityGroupId
+        "disruption": {
+          "consolidationPolicy": "WhenUnderutilized"
+        },
+        "limits": {
+          "cpu": "1000"
         }
       }
     })
@@ -189,7 +194,7 @@ export class KarpenterTestStack extends cdk.Stack {
 
     const cluster = this.createEKSCluster(vpc, 'karpenter-test')
 
-    const karpenter = this.installKarpenter(cluster, 'v0.31.0')
+    const karpenter = this.installKarpenter(cluster, 'v0.32.0')
 
     const defaultProvisionerAndNodeTemplate = this.applyDefaultProvisionerAndNodeTemplateManifest(cluster)
     defaultProvisionerAndNodeTemplate.node.addDependency(karpenter)

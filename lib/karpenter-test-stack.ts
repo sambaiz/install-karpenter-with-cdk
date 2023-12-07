@@ -157,6 +157,16 @@ export class KarpenterTestStack extends cdk.Stack {
         "securityGroupSelectorTerms": [{
           "id": cluster.clusterSecurityGroup.securityGroupId
         }],
+
+        // optional
+        "blockDeviceMappings": [{
+          "deviceName": "/dev/xvda",
+          "ebs": {
+            "volumeSize": "100Gi",
+            "volumeType": "gp3",
+            "deleteOnTermination": true,
+          }
+        }]
       }
     }, {
       "apiVersion": "karpenter.sh/v1beta1",

@@ -73,7 +73,6 @@ export class KarpenterTestStack extends cdk.Stack {
 
     const controllerPolicy = iam.ManagedPolicy.fromManagedPolicyName(this, 'KarpenterControllerPolicy', `KarpenterControllerPolicy-${cluster.clusterName}`)
     const nodeRole = iam.Role.fromRoleName(this, 'KarpenterNodeRoleRef', `KarpenterNodeRole-${cluster.clusterName}`)
-    const instanceProfileName = `KarpenterNodeInstanceProfile-${cluster.clusterName}`
     const interruptionQueueName = cluster.clusterName
 
     // resources that can be created by eksctl ClusterConfig
@@ -116,11 +115,8 @@ export class KarpenterTestStack extends cdk.Stack {
           }
         },
         settings: {
-          aws: {
-            clusterName: cluster.clusterName,
-            defaultInstanceProfile: instanceProfileName,
-            interruptionQueueName: interruptionQueueName
-          }
+          clusterName: cluster.clusterName,
+          interruptionQueueName: interruptionQueueName
         },
         controller: {
           resources: {
@@ -149,11 +145,7 @@ export class KarpenterTestStack extends cdk.Stack {
       "spec": {
         "amiFamily": "AL2",
         "role": `KarpenterNodeRole-${cluster.clusterName}`,
-        "subnetSelectorTerms": [{
-          "tags": {
-            "Name": cluster.vpc.publicSubnets.join(",")
-          }
-        }],
+        "subnetSelectorTerms": cluster.vpc.publicSubnets.map(s => ({"id": s.subnetId})),
         "securityGroupSelectorTerms": [{
           "id": cluster.clusterSecurityGroup.securityGroupId
         }],
@@ -204,7 +196,7 @@ export class KarpenterTestStack extends cdk.Stack {
 
     const cluster = this.createEKSCluster(vpc, 'karpenter-test')
 
-    const karpenter = this.installKarpenter(cluster, 'v0.32.0')
+    const karpenter = this.installKarpenter(cluster, 'v0.33.0')
 
     const defaultProvisionerAndNodeTemplate = this.applyDefaultProvisionerAndNodeTemplateManifest(cluster)
     defaultProvisionerAndNodeTemplate.node.addDependency(karpenter)

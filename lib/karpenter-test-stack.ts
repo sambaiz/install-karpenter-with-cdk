@@ -116,7 +116,7 @@ export class KarpenterTestStack extends cdk.Stack {
         },
         settings: {
           clusterName: cluster.clusterName,
-          interruptionQueueName: interruptionQueueName
+          interruptionQueue: interruptionQueueName
         },
         controller: {
           resources: {
